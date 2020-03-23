@@ -1,0 +1,231 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"log"
+	"math"
+	"os"
+	"sort"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const admin = "yaspe"
+const dataFileName = "data.db"
+const betTimeFrom = 16
+const betTimeTo = 9
+
+var current = 0
+var bets = make(map[string]int)
+var chats = make(map[string]int64)
+
+func help() string {
+	hours, minutes := msk_time()
+	h := fmt.Sprintf(
+		"Это бот ставок на количество зараженных коронавирусом в России. " +
+		"Число заболевших отсчитывается с 1го дня, таким образом каждый день оно должно расти\n" +
+		"Ставки принимаются с %d до %d часов по Москве. Сейчас %d:%02d\n" +
+		"Подведение итогов в районе 18 часов каждого дня\n" +
+		"На данный момент заболевших: %d\n\n" +
+		"/bet <число> : сделать ставку на число заболевших завтра\n" +
+		"/mybet : посмотреть свою ставку\n" +
+		"/get : узнать число зараженных за прошлый день",
+		betTimeFrom, betTimeTo, hours, minutes, current)
+	return h
+}
+
+func msk_time() (int, int) {
+	hours, minutes, _ := time.Now().Clock()
+	return hours + 3, minutes
+}
+
+func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
+	if len(msg.From.UserName) == 0 {
+		return "", errors.New("no username - go away"), false
+	}
+
+	chats[msg.From.UserName] = msg.Chat.ID
+
+	parts := strings.Split(msg.Text, " ")
+	if parts[0] == "/set" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+		if len(parts) != 2 {
+			return "", errors.New("args num mismatch"), false
+		}
+		var e error
+		current, e = strconv.Atoi(parts[1])
+		if e != nil {
+			return "", e, false
+		}
+		return "ok", nil, false
+	} else if parts[0] == "/clear" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+		bets = make(map[string]int)
+		return "ok", nil, false
+	} else if parts[0] == "/broadcast" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+		if len(parts) < 2 {
+			return "", errors.New("args num mismatch"), false
+		}
+
+		return strings.Join(parts[1:], " "), nil, true
+	} else if parts[0] == "/report" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+
+		if current == 0 {
+			return "", errors.New("set current"), false
+		}
+
+		top := make(map[int]string)
+		for u, b := range bets {
+			if b == 0 {
+				continue
+			}
+			diff := int(math.Abs(float64(current - b)))
+			top[diff] += "@" + u + " "
+		}
+
+		var keys []int
+		for k := range top {
+			keys = append(keys, k)
+		}
+		sort.Ints(keys)
+
+		result := "Всего заболевших в России на данный момент: " + strconv.Itoa(current) + "\nпобедители дня(ошибка):\n"
+		start := true
+		for _, k := range keys {
+			result += top[k] + " (" + strconv.Itoa(k) + ")\n"
+			if start {
+				result += "проиграли:\n"
+				start = false
+			}
+		}
+
+		bets = make(map[string]int)
+
+		return result, nil, true
+	} else if parts[0] == "/dump" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+
+		Dump()
+
+		result := "ставки:"
+		for u, b := range bets {
+			if b == 0 {
+				continue
+			}
+			result += u + " " + strconv.Itoa(b) + "\n"
+		}
+
+		result += "\nчаты:"
+		for u, c := range chats {
+			if c == 0 {
+				continue
+			}
+			result += u + " " + strconv.Itoa(int(c)) + "\n"
+		}
+
+		return result, nil, false
+	} else if parts[0] == "/bet" {
+		if len(parts) != 2 {
+			return "", errors.New("неверное числа параметров"), false
+		}
+
+		hours, minutes := msk_time()
+		betable := !(hours < betTimeFrom && hours > betTimeTo)
+		if !betable {
+			message := fmt.Sprintf("Во избежании нечестной игры, ставки можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
+				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)
+			return message, nil, false
+		}
+
+		var e error
+		bet, e := strconv.Atoi(parts[1])
+		if e != nil {
+			return "", e, false
+		}
+
+		if current > 0 && bet < current {
+			return "Число заболевших фиксируется с 1го дня и не может уменьшится. Ставка невалидна", nil, false
+		}
+
+		bets[msg.From.UserName] = bet
+		return "Ваша ставка принята!", nil, false
+	} else if parts[0] == "/get" {
+		return strconv.Itoa(current), nil, false
+	} else if parts[0] == "/mybet" {
+		return strconv.Itoa(bets[msg.From.UserName]), nil, false
+	} else {
+		return help(), nil, false
+	}
+}
+
+
+
+func main() {
+	Load()
+	token := os.Args[1]
+
+	bot, err := tgbotapi.NewBotAPI(token)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	bot.Debug = false
+
+	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	u := tgbotapi.NewUpdate(0)
+	u.Timeout = 60
+
+	updates, err := bot.GetUpdatesChan(u)
+
+	for update := range updates {
+		if update.Message == nil { // ignore any non-Message Updates
+			continue
+		}
+
+		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+
+		var msg tgbotapi.MessageConfig
+
+		ans, err, all := handleMessage(update.Message)
+		if err != nil {
+			log.Printf("Could not process message: %s %s", update.Message.Text, err)
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+			//msg.ReplyToMessageID = update.Message.MessageID
+		} else {
+			if all {
+				for _, chat := range chats {
+					log.Printf("Broadcasting message to: %s", chat)
+					msg = tgbotapi.NewMessage(chat, ans)
+					_, err = bot.Send(msg)
+					if err != nil {
+						log.Printf("Could not send message: %s", err)
+					}
+				}
+				continue
+			} else {
+				msg = tgbotapi.NewMessage(update.Message.Chat.ID, ans)
+			}
+		}
+
+		_, err = bot.Send(msg)
+		if err != nil {
+			log.Printf("Could not send message: %s", err)
+		}
+	}
+}
