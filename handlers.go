@@ -35,6 +35,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		if msg.From.UserName != admin {
 			return "", errors.New("you are not admin"), false
 		}
+		Dump()
 		shouldShutdown = true
 		return "ok", nil, false
 	} else if parts[0] == "/clear" {
@@ -96,21 +97,27 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 
 		Dump()
 
-		result := "ставки:"
+		result := "ставки:\n"
+		count := 0
 		for u, b := range bets {
 			if b == 0 {
 				continue
 			}
+			count++
 			result += u + " " + strconv.Itoa(b) + "\n"
 		}
+		result += "Всего " + strconv.Itoa(count)
 
-		result += "\nчаты:"
+		result += "\n\nчаты:\n"
+		count = 0
 		for u, c := range chats {
 			if c == 0 {
 				continue
 			}
+			count++
 			result += u + " " + strconv.Itoa(int(c)) + "\n"
 		}
+		result += "Всего " + strconv.Itoa(count)
 
 		return result, nil, false
 	} else if parts[0] == "/bet" {
