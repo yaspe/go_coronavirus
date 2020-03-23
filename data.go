@@ -9,6 +9,9 @@ import (
 )
 
 func Dump() {
+	dataLock.Lock()
+	defer dataLock.Unlock()
+
 	_, err := os.Create(dataFileName)
 	if err != nil {
 		fmt.Println(err)
@@ -34,6 +37,9 @@ func Dump() {
 }
 
 func Load() {
+	dataLock.Lock()
+	defer dataLock.Unlock()
+	
 	db, err := sql.Open("sqlite3", dataFileName)
 	defer db.Close()
 	if err != nil {
