@@ -10,7 +10,7 @@ import (
 const (
 	admin = "yaspe"
  	dataFileName = "data.db"
- 	betTimeFrom = 19
+ 	betTimeFrom = 16
  	betTimeTo = 9
 )
 

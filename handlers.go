@@ -64,6 +64,10 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 			return "", errors.New("you are not admin"), false
 		}
 
+		if len(parts) != 1 {
+			return "", errors.New("args num mismatch"), false
+		}
+
 		if current == 0 {
 			return "", errors.New("set current"), false
 		}
