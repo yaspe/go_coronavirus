@@ -18,7 +18,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 	chats[msg.From.UserName] = msg.Chat.ID
 
 	parts := strings.Split(msg.Text, " ")
-	if parts[0] == "/set" {
+	if parts[0] == "/set_current" {
 		if msg.From.UserName != admin {
 			return "", errors.New("you are not admin"), false
 		}
@@ -38,6 +38,12 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		Dump()
 		shouldShutdown = true
 		return "ok", nil, false
+	} else if parts[0] == "/switch" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+		forceBetable = !forceBetable
+		return strconv.FormatBool(forceBetable), nil, false
 	} else if parts[0] == "/clear" {
 		if msg.From.UserName != admin {
 			return "", errors.New("you are not admin"), false
@@ -125,9 +131,8 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 			return "", errors.New("неверное числа параметров"), false
 		}
 
-		hours, minutes := msk_time()
-		betable := !(hours < betTimeFrom && hours > betTimeTo)
-		if !betable {
+		if !betable() {
+			hours, minutes := msk_time()
 			message := fmt.Sprintf("Во избежании нечестной игры, ставки можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
 				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)
 			return message, nil, false

@@ -10,15 +10,18 @@ import (
 const (
 	admin = "yaspe"
  	dataFileName = "data.db"
- 	betTimeFrom = 16
+ 	betTimeFrom = 19
  	betTimeTo = 9
 )
 
-var current = 0
-var shouldShutdown = false
-var bets = make(map[string]int)
-var chats = make(map[string]int64)
-var dataLock sync.Mutex
+var (
+	current = 0
+	shouldShutdown = false
+	bets = make(map[string]int)
+	chats = make(map[string]int64)
+	dataLock sync.Mutex
+	forceBetable = false
+)
 
 func main() {
 	Load()
@@ -71,6 +74,17 @@ func main() {
 				msg = tgbotapi.NewMessage(update.Message.Chat.ID, ans)
 			}
 		}
+
+		/*markup := tgbotapi.ReplyKeyboardMarkup{
+			Keyboard: [][]tgbotapi.KeyboardButton{
+				[]tgbotapi.KeyboardButton{
+					tgbotapi.KeyboardButton{Text: "/bet"},
+					tgbotapi.KeyboardButton{Text: "/mybet"},
+					tgbotapi.KeyboardButton{Text: "/get"},
+				},
+			},
+		}
+		msg.ReplyMarkup = markup*/
 
 		_, err = bot.Send(msg)
 		if err != nil {

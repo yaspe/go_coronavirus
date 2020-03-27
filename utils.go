@@ -24,3 +24,16 @@ func msk_time() (int, int) {
 	hours, minutes, _ := time.Now().Clock()
 	return hours + 3, minutes
 }
+
+func betable() bool {
+	hours, _ := msk_time()
+	ok := !(hours < betTimeFrom && hours > betTimeTo)
+	if ok {
+		forceBetable = false
+		return true
+	}
+	if forceBetable {
+		return true
+	}
+	return false
+}
