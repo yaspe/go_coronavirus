@@ -136,7 +136,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		}
 
 		if !betable() {
-			hours, minutes := msk_time()
+			hours, minutes := mskTime()
 			message := fmt.Sprintf("Во избежании нечестной игры, ставки можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
 				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)
 			return message, nil, false

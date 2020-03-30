@@ -34,6 +34,18 @@ func Dump() {
 			return
 		}
 	}
+
+	_, err = db.Exec("CREATE TABLE `infected` (`current` INTEGER)")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = db.Exec("INSERT INTO `infected` VALUES (?)", current)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 }
 
 func Load() {
@@ -47,7 +59,11 @@ func Load() {
 		return
 	}
 
-	rows, _ := db.Query("SELECT * FROM `bets`")
+	rows, err := db.Query("SELECT * FROM `bets`")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer rows.Close()
 	for rows.Next() {
 		var (
@@ -61,5 +77,19 @@ func Load() {
 		}
 		chats[name] = chat
 		bets[name] = bet
+	}
+
+	rows, err = db.Query("SELECT * FROM `infected`")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&current); err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
 }
