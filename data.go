@@ -46,6 +46,20 @@ func Dump() {
 		fmt.Println(err)
 		return
 	}
+
+	_, err = db.Exec("CREATE TABLE `winners` (`username` VARCHAR(64) NOT NULL, `times` INTEGER)")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	for username, times := range winners {
+		_, err = db.Exec("INSERT INTO `winners` VALUES (?, ?)", username, times)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
 }
 
 func Load() {
@@ -91,5 +105,23 @@ func Load() {
 			fmt.Println(err)
 			return
 		}
+	}
+
+	rows, err = db.Query("SELECT * FROM `winners`")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var (
+			times   int
+			name string
+		)
+		if err := rows.Scan(&name, &times); err != nil {
+			fmt.Println(err)
+			return
+		}
+		winners[name] = times
 	}
 }

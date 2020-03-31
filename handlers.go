@@ -44,6 +44,15 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		}
 		forceBetable = !forceBetable
 		return strconv.FormatBool(forceBetable), nil, false
+	} else if parts[0] == "/add_winner" {
+		if msg.From.UserName != admin {
+			return "", errors.New("you are not admin"), false
+		}
+		if len(parts) != 2 {
+			return "", errors.New("args num mismatch"), false
+		}
+		winners[parts[1]] ++
+		return "ok", nil, false
 	} else if parts[0] == "/clear" {
 		if msg.From.UserName != admin {
 			return "", errors.New("you are not admin"), false
@@ -161,6 +170,12 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		return strconv.Itoa(bets[msg.From.UserName]), nil, false
 	} else if parts[0] == "/github" {
 		return "https://github.com/yaspe/go_coronavirus", nil, false
+	} else if parts[0] == "/winners" {
+		result := "Победители предыдущих дней (количество побед):\n"
+		for name, times := range winners {
+			result += name + " (" + strconv.Itoa(times) + ")\n"
+		}
+		return result, nil, false
 	} else {
 		return help(), nil, false
 	}
