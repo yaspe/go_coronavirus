@@ -171,9 +171,24 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 	} else if parts[0] == "/github" {
 		return "https://github.com/yaspe/go_coronavirus", nil, false
 	} else if parts[0] == "/winners" {
+
+		type kv struct {
+			Key   string
+			Value int
+		}
+
+		var ss []kv
+		for k, v := range winners {
+			ss = append(ss, kv{k, v})
+		}
+
+		sort.Slice(ss, func(i, j int) bool {
+			return ss[i].Value > ss[j].Value
+		})
+
 		result := "Победители предыдущих дней (количество побед):\n"
-		for name, times := range winners {
-			result += name + " (" + strconv.Itoa(times) + ")\n"
+		for _, kv := range ss {
+			result += kv.Key + " (" + strconv.Itoa(kv.Value) + ")\n"
 		}
 		return result, nil, false
 	} else {
