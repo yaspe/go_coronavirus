@@ -10,6 +10,16 @@ import (
 	"strings"
 )
 
+func formatName(name string) string {
+	ret := "@" + name
+	if times, ok := winners[name]; ok {
+		for i := 0; i < times; i++ {
+			ret += "★"
+		}
+	}
+	return ret
+}
+
 func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 	if len(msg.From.UserName) == 0 {
 		return "", errors.New("no username - go away"), false
@@ -110,7 +120,13 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		result := "Всего заболевших в России на данный момент: " + strconv.Itoa(current) + "\n---победители дня(ошибка):---\n"
 		start := true
 		for _, k := range keys {
-			result += strings.Join(top[k], ", ") + " (" + strconv.Itoa(k) + ")\n"
+			for i, name := range(top[k]) {
+				if i > 0 {
+					result += ", "
+				}
+				result += formatName(name)
+			}
+			result += " (" + strconv.Itoa(k) + ")\n"
 			if start {
 				result += "---проиграли:---\n"
 				start = false
@@ -197,9 +213,9 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 			return ss[i].Value > ss[j].Value
 		})
 
-		result := "Победители предыдущих дней (количество побед):\n"
+		result := "Победители предыдущих дней (каждая звездочка - победа):\n"
 		for _, kv := range ss {
-			result += kv.Key + " (" + strconv.Itoa(kv.Value) + ")\n"
+			result += formatName(kv.Key) + "\n"
 		}
 		return result, nil, false
 	} else {
