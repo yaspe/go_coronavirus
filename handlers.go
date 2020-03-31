@@ -99,6 +99,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 
 		bets = make(map[string]int)
 
+		forceBetable = true
 		return result, nil, true
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {
