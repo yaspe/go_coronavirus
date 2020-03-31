@@ -159,6 +159,8 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		return strconv.Itoa(current), nil, false
 	} else if parts[0] == "/mybet" {
 		return strconv.Itoa(bets[msg.From.UserName]), nil, false
+	} else if parts[0] == "/github" {
+		return "https://github.com/yaspe/go_coronavirus", nil, false
 	} else {
 		return help(), nil, false
 	}
