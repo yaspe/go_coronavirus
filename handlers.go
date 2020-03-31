@@ -81,13 +81,18 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 			return "", errors.New("set current"), false
 		}
 
-		top := make(map[int]string)
+		top := make(map[int][]string)
 		for u, b := range bets {
 			if b == 0 {
 				continue
 			}
 			diff := int(math.Abs(float64(current - b)))
-			top[diff] += "@" + u + " "
+			if _, ok := top[diff]; ok {
+				top[diff] = append(top[diff], u)
+			} else {
+				top[diff] = make([]string, 1)
+				top[diff][0] = u
+			}
 		}
 
 		var keys []int
@@ -96,12 +101,18 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		}
 		sort.Ints(keys)
 
-		result := "Всего заболевших в России на данный момент: " + strconv.Itoa(current) + "\nпобедители дня(ошибка):\n"
+		if len(keys) > 0 {
+			for _, winner := range top[keys[0]] {
+				winners[winner] ++
+			}
+		}
+
+		result := "Всего заболевших в России на данный момент: " + strconv.Itoa(current) + "\n---победители дня(ошибка):---\n"
 		start := true
 		for _, k := range keys {
-			result += top[k] + " (" + strconv.Itoa(k) + ")\n"
+			result += strings.Join(top[k], ", ") + " (" + strconv.Itoa(k) + ")\n"
 			if start {
-				result += "проиграли:\n"
+				result += "---проиграли:---\n"
 				start = false
 			}
 		}
