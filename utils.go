@@ -6,9 +6,9 @@ import (
 )
 
 func help() string {
-	betsInfo := fmt.Sprintf("Сейчас прием ставок открыт и продлится до %d часов утра", betTimeTo)
-	if !betable() {
-		betsInfo = fmt.Sprintf("Сейчас прием ставок закрыт. Он откроется после объявления результатов предыдущего дня и продлится до %d часов утра", betTimeTo)
+	betsInfo := fmt.Sprintf("Сейчас прием ставок открыт и продлится до %d часов утра по Москве", betTimeTo)
+	if !betsAllowed() {
+		betsInfo = fmt.Sprintf("Сейчас прием ставок закрыт. Он откроется после объявления результатов предыдущего дня и продлится до %d часов утра по Москве", betTimeTo)
 	}
 
 	// ★
@@ -33,14 +33,14 @@ func mskTime() (int, int) {
 	return hours + 3, minutes
 }
 
-func betable() bool {
+func betsAllowed() bool {
 	hours, _ := mskTime()
 	ok := !(hours < betTimeFrom && hours > betTimeTo)
 	if ok {
-		forceBetable = false
+		forceBetsAllowed = false
 		return true
 	}
-	if forceBetable {
+	if forceBetsAllowed {
 		return true
 	}
 	return false

@@ -15,13 +15,13 @@ const (
 )
 
 var (
-	current = 0
-	shouldShutdown = false
-	bets = make(map[string]int)
-	chats = make(map[string]int64)
-	winners = make(map[string]int)
-	dataLock sync.Mutex
-	forceBetable = false
+	current          = 0
+	shouldShutdown   = false
+	bets             = make(map[string]int)
+	chats            = make(map[string]int64)
+	winners          = make(map[string]int)
+	dataLock         sync.Mutex
+	forceBetsAllowed = false
 )
 
 func main() {

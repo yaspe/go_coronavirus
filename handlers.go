@@ -52,8 +52,8 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		if msg.From.UserName != admin {
 			return "", errors.New("you are not admin"), false
 		}
-		forceBetable = !forceBetable
-		return strconv.FormatBool(forceBetable), nil, false
+		forceBetsAllowed = !forceBetsAllowed
+		return strconv.FormatBool(forceBetsAllowed), nil, false
 	} else if parts[0] == "/add_winner" {
 		if msg.From.UserName != admin {
 			return "", errors.New("you are not admin"), false
@@ -135,7 +135,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 
 		bets = make(map[string]int)
 
-		forceBetable = true
+		forceBetsAllowed = true
 		return result, nil, true
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {
@@ -172,7 +172,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 			return "", errors.New("неверное числа параметров"), false
 		}
 
-		if !betable() {
+		if !betsAllowed() {
 			hours, minutes := mskTime()
 			message := fmt.Sprintf("Во избежании нечестной игры, ставки можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
 				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)
