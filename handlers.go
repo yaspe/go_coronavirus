@@ -153,7 +153,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 				continue
 			}
 			count++
-			result += u + " " + strconv.Itoa(b) + "\n"
+			result += formatName(u) + " " + strconv.Itoa(b) + "\n"
 		}
 		result += "Всего " + strconv.Itoa(count)
 
