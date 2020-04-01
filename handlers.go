@@ -10,15 +10,13 @@ import (
 	"strings"
 )
 
-func formatName(name string) string {
-	ret := "@" + name
-	if times, ok := winners[name]; ok {
-		for i := 0; i < times; i++ {
-			ret += "★"
-		}
-	}
-	return ret
+
+func setCurrent(s string) error {
+	var e error
+	current, e = strconv.Atoi(s)
+	return e
 }
+
 
 func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 	if len(msg.From.UserName) == 0 {
@@ -35,8 +33,7 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		if len(parts) != 2 {
 			return "", errors.New("args num mismatch"), false
 		}
-		var e error
-		current, e = strconv.Atoi(parts[1])
+		e := setCurrent(parts[1])
 		if e != nil {
 			return "", e, false
 		}
@@ -83,8 +80,13 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 			return "", errors.New("you are not admin"), false
 		}
 
-		if len(parts) != 1 {
+		if len(parts) != 2 {
 			return "", errors.New("args num mismatch"), false
+		}
+
+		e := setCurrent(parts[1])
+		if e != nil {
+			return "", e, false
 		}
 
 		if current == 0 {
@@ -155,16 +157,18 @@ func handleMessage(msg *tgbotapi.Message) (string, error, bool) {
 		}
 		result += "Всего " + strconv.Itoa(count)
 
-		result += "\n\nчаты:\n"
-		count = 0
-		for u, c := range chats {
-			if c == 0 {
-				continue
+		if len(parts) == 2 {
+			result += "\n\nчаты:\n"
+			count = 0
+			for u, c := range chats {
+				if c == 0 {
+					continue
+				}
+				count++
+				result += u + " " + strconv.Itoa(int(c)) + "\n"
 			}
-			count++
-			result += u + " " + strconv.Itoa(int(c)) + "\n"
+			result += "Всего " + strconv.Itoa(count)
 		}
-		result += "Всего " + strconv.Itoa(count)
 
 		return result, nil, false
 	} else if parts[0] == "/bet" {

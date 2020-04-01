@@ -67,3 +67,13 @@ func chatsCount() int {
 	}
 	return c
 }
+
+func formatName(name string) string {
+	ret := "@" + name
+	if times, ok := winners[name]; ok {
+		for i := 0; i < times; i++ {
+			ret += "★"
+		}
+	}
+	return ret
+}
