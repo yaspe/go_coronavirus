@@ -10,8 +10,8 @@ import (
 const (
 	admin = "yaspe"
  	dataFileName = "data.db"
- 	betTimeFrom = 16
- 	betTimeTo = 9
+ 	betTimeFrom = 15
+ 	betTimeTo = 7
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 	chats            = make(map[string]int64)
 	winners          = make(map[string]int)
 	dataLock         sync.Mutex
-	forceBetsAllowed = false
+	forceBetsAllowed = true
 )
 
 func main() {
