@@ -28,9 +28,9 @@ func main() {
 	Load()
 	token := os.Args[1]
 
-	bot, err := tgbotapi.NewBotAPI(token)
-	if err != nil {
-		log.Panic(err)
+	bot, er := tgbotapi.NewBotAPI(token)
+	if er != nil {
+		log.Panic(er)
 	}
 
 	bot.Debug = false
@@ -40,7 +40,7 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, err := bot.GetUpdatesChan(u)
+	updates, er := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
@@ -51,34 +51,34 @@ func main() {
 
 		var msg tgbotapi.MessageConfig
 
-		ans, err, all := handleMessage(update.Message)
+		result := handleMessage(update.Message)
 		if shouldShutdown {
 			dataLock.Lock()
 			return
 		}
-		if err != nil {
-			log.Printf("Could not process message: %s %s", update.Message.Text, err)
-			msg = tgbotapi.NewMessage(update.Message.Chat.ID, err.Error())
+		if result.Error != nil {
+			log.Printf("Could not process message: %s %s", update.Message.Text, result.Error)
+			msg = tgbotapi.NewMessage(update.Message.Chat.ID, result.Error.Error())
 			//msg.ReplyToMessageID = update.Message.MessageID
 		} else {
-			if all {
+			if result.BroadCast {
 				for _, chat := range chats {
 					log.Printf("Broadcasting message to: %s", chat)
-					msg = tgbotapi.NewMessage(chat, ans)
-					_, err = bot.Send(msg)
-					if err != nil {
-						log.Printf("Could not send message: %s", err)
+					msg = tgbotapi.NewMessage(chat, result.Reply)
+					_, er := bot.Send(msg)
+					if er != nil {
+						log.Printf("Could not send message: %s", er)
 					}
 				}
 				continue
 			} else {
-				msg = tgbotapi.NewMessage(update.Message.Chat.ID, ans)
+				msg = tgbotapi.NewMessage(update.Message.Chat.ID, result.Reply)
 			}
 		}
 
-		_, err = bot.Send(msg)
-		if err != nil {
-			log.Printf("Could not send message: %s", err)
+		_, er = bot.Send(msg)
+		if er != nil {
+			log.Printf("Could not send message: %s", er)
 		}
 	}
 }
