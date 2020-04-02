@@ -62,7 +62,12 @@ func main() {
 			//msg.ReplyToMessageID = update.Message.MessageID
 		} else {
 			if result.BroadCast {
-				for _, chat := range chats {
+				for username, chat := range chats {
+					if result.RemindMode {
+						if val, ok := bets[username]; ok && val > 0 {
+							continue
+						}
+					}
 					log.Printf("Broadcasting message to: %s", chat)
 					msg = tgbotapi.NewMessage(chat, result.Reply)
 					_, er := bot.Send(msg)

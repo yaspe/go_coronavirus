@@ -22,12 +22,28 @@ type HandlerResult struct {
 	Reply string
 	Error error
 	BroadCast bool
+	RemindMode bool
 }
 
+func MakeHandlerResultSuccess(reply string) *HandlerResult {
+	return &HandlerResult{reply, nil, false, false}
+}
 
-func handleMessage(msg *tgbotapi.Message) HandlerResult {
+func MakeHandlerResultBroadcast(reply string) *HandlerResult {
+	return &HandlerResult{reply, nil, true, false}
+}
+
+func MakeHandlerResultRemind(reply string) *HandlerResult {
+	return &HandlerResult{reply, nil, true, true}
+}
+
+func MakeHandlerResultError(e error) *HandlerResult {
+	return &HandlerResult{"", e, false, false}
+}
+
+func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 	if len(msg.From.UserName) == 0 {
-		return HandlerResult{"", errors.New("no username - go away"), false}
+		return MakeHandlerResultError(errors.New("no username - go away"))
 	}
 
 	chats[msg.From.UserName] = msg.Chat.ID
@@ -35,69 +51,78 @@ func handleMessage(msg *tgbotapi.Message) HandlerResult {
 	parts := strings.Split(msg.Text, " ")
 	if parts[0] == "/set_current" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 		if len(parts) != 2 {
-			return HandlerResult{"", errors.New("args num mismatch"), false}
+			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
 		e := setCurrent(parts[1])
 		if e != nil {
-			return HandlerResult{"", e, false}
+			return MakeHandlerResultError(e)
 		}
-		return HandlerResult{"ok", nil, false}
+		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/shutdown" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 		Dump()
 		shouldShutdown = true
-		return HandlerResult{"ok", nil, false}
+		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/switch" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 		forceBetsAllowed = !forceBetsAllowed
-		return HandlerResult{strconv.FormatBool(forceBetsAllowed), nil, false}
+		return MakeHandlerResultSuccess(strconv.FormatBool(forceBetsAllowed))
 	} else if parts[0] == "/add_winner" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 		if len(parts) != 2 {
-			return HandlerResult{"", errors.New("args num mismatch"), false}
+			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
 		winners[parts[1]] ++
-		return HandlerResult{"ok", nil, false}
+		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/clear" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 		bets = make(map[string]int)
-		return HandlerResult{"ok", nil, false}
+		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/broadcast" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 		if len(parts) < 2 {
-			return HandlerResult{"", errors.New("args num mismatch"), false}
+			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
 
-		return HandlerResult{strings.Join(parts[1:], " "), nil, true}
+		return MakeHandlerResultBroadcast(strings.Join(parts[1:], " "))
+	} else if parts[0] == "/remind" {
+		if msg.From.UserName != admin {
+			return MakeHandlerResultError(errors.New("you are not admin"))
+		}
+		if len(parts) < 2 {
+			return MakeHandlerResultError(errors.New("args num mismatch"))
+		}
+
+		return MakeHandlerResultRemind(strings.Join(parts[1:], " "))
 	} else if parts[0] == "/report" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 
 		if len(parts) != 2 {
-			return HandlerResult{"", errors.New("args num mismatch"), false}
+			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
 
 		e := setCurrent(parts[1])
 		if e != nil {
-			return HandlerResult{"", e, false}
+			return MakeHandlerResultError(e)
 		}
 
 		if current == 0 {
-			return HandlerResult{"", errors.New("set current"), false}
+			return MakeHandlerResultError(errors.New("set current"))
 		}
 
 		top := make(map[int][]string)
@@ -145,10 +170,10 @@ func handleMessage(msg *tgbotapi.Message) HandlerResult {
 		bets = make(map[string]int)
 
 		forceBetsAllowed = true
-		return HandlerResult{result, nil, true}
+		return MakeHandlerResultBroadcast(result)
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {
-			return HandlerResult{"", errors.New("you are not admin"), false}
+			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
 
 		Dump()
@@ -177,37 +202,37 @@ func handleMessage(msg *tgbotapi.Message) HandlerResult {
 			result += "Всего " + strconv.Itoa(count)
 		}
 
-		return HandlerResult{result, nil, false}
+		return MakeHandlerResultSuccess(result)
 	} else if parts[0] == "/bet" {
 		if len(parts) != 2 {
-			return HandlerResult{"", errors.New("неверное числа параметров"), false}
+			return MakeHandlerResultError(errors.New("неверное числа параметров"))
 		}
 
 		if !betsAllowed() {
 			hours, minutes := mskTime()
 			message := fmt.Sprintf("Во избежании нечестной игры, ставки можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
 				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)
-			return HandlerResult{message, nil, false}
+			return MakeHandlerResultSuccess(message)
 		}
 
 		var e error
 		bet, e := strconv.Atoi(parts[1])
 		if e != nil {
-			return HandlerResult{"", e, false}
+			return MakeHandlerResultError(e)
 		}
 
 		if current > 0 && bet < current {
-			return HandlerResult{"Число заболевших фиксируется с 1го дня и не может уменьшится. Ставка невалидна", nil, false}
+			return MakeHandlerResultError(errors.New("Число заболевших фиксируется с 1го дня и не может уменьшится. Ставка невалидна"))
 		}
 
 		bets[msg.From.UserName] = bet
-		return HandlerResult{"Ваша ставка принята!", nil, false}
+		return MakeHandlerResultSuccess("Ваша ставка принята!")
 	} else if parts[0] == "/get" {
-		return HandlerResult{strconv.Itoa(current), nil, false}
+		return MakeHandlerResultSuccess(strconv.Itoa(current))
 	} else if parts[0] == "/mybet" {
-		return HandlerResult{strconv.Itoa(bets[msg.From.UserName]), nil, false}
+		return MakeHandlerResultSuccess(strconv.Itoa(bets[msg.From.UserName]))
 	} else if parts[0] == "/github" {
-		return HandlerResult{"https://github.com/yaspe/go_coronavirus", nil, false}
+		return MakeHandlerResultSuccess("https://github.com/yaspe/go_coronavirus")
 	} else if parts[0] == "/winners" {
 
 		type kv struct {
@@ -228,8 +253,8 @@ func handleMessage(msg *tgbotapi.Message) HandlerResult {
 		for _, kv := range ss {
 			result += formatName(kv.Key) + "\n"
 		}
-		return HandlerResult{result, nil, false}
+		return MakeHandlerResultSuccess(result)
 	} else {
-		return HandlerResult{help(), nil, false}
+		return MakeHandlerResultSuccess(help())
 	}
 }
