@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 
@@ -15,6 +16,20 @@ func setCurrent(s string) error {
 	var e error
 	current, e = strconv.Atoi(s)
 	return e
+}
+
+func remindLater() {
+	time.Sleep(5 * time.Hour)
+	for username, chat := range chats {
+		if val, ok := bets[username]; ok && val > 0 {
+			continue
+		}
+		msg := tgbotapi.NewMessage(chat, remind())
+		_, er := bot.Send(msg)
+		if er != nil {
+			fmt.Printf("Could not send message: %s\n", er)
+		}
+	}
 }
 
 
@@ -170,6 +185,8 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		bets = make(map[string]int)
 
 		forceBetsAllowed = true
+
+		go remindLater()
 		return MakeHandlerResultBroadcast(result)
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {

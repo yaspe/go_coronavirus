@@ -29,6 +29,14 @@ func help() string {
 	return h
 }
 
+func remind() string {
+	text := fmt.Sprintf("Напоминаем, что прием прогнозов открыт!\n" +
+		"На данный момент принято уже %d прогнозов, заболевших вчера - %d\n" +
+		"Прием ставок продлится до %d часов утра по Москве",
+		betsCount(), current, betTimeTo)
+	return text
+}
+
 func mskTime() (int, int) {
 	hours, minutes, _ := time.Now().Clock()
 	return hours + 3, minutes

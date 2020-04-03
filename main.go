@@ -24,11 +24,14 @@ var (
 	forceBetsAllowed = true
 )
 
+var bot *tgbotapi.BotAPI
+
 func main() {
 	Load()
 	token := os.Args[1]
 
-	bot, er := tgbotapi.NewBotAPI(token)
+	var er error
+	bot, er = tgbotapi.NewBotAPI(token)
 	if er != nil {
 		log.Panic(er)
 	}
@@ -68,7 +71,7 @@ func main() {
 							continue
 						}
 					}
-					log.Printf("Broadcasting message to: %s", chat)
+					log.Printf("Broadcasting message to: %d", chat)
 					msg = tgbotapi.NewMessage(chat, result.Reply)
 					_, er := bot.Send(msg)
 					if er != nil {
