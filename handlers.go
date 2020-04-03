@@ -166,7 +166,11 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			}
 		}
 
-		result := "Всего заболевших в России на данный момент: " + strconv.Itoa(current) + "\n---победители дня(ошибка):---\n"
+		result := fmt.Sprintf("Подводим итоги дня!\n" +
+			"Было принято ставок: %d\n" +
+			"Всего заболевших в России на данный момент: %d\n\n" +
+			"---победители дня(ошибка):---\n",
+			betsCount(), current)
 		start := true
 		for _, k := range keys {
 			for i, name := range(top[k]) {
