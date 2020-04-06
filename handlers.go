@@ -18,18 +18,31 @@ func setCurrent(s string) error {
 	return e
 }
 
-func remindLater() {
-	time.Sleep(5 * time.Hour)
+func remindLater(d time.Duration, msg string) {
+	time.Sleep(d)
 	for username, chat := range chats {
 		if val, ok := bets[username]; ok && val > 0 {
 			continue
 		}
-		msg := tgbotapi.NewMessage(chat, remind())
+		msg := tgbotapi.NewMessage(chat, msg)
 		_, er := bot.Send(msg)
 		if er != nil {
 			fmt.Printf("Could not send message: %s\n", er)
 		}
 	}
+}
+
+func earlyRemind() {
+	text := fmt.Sprintf("Прием прогнозов на сегодня открыт и продлится до %d часов утра по Москве!\n", betTimeTo)
+	remindLater(5 * time.Minute, text)
+}
+
+func lateRemind() {
+	text := fmt.Sprintf("Напоминаем, что прием прогнозов открыт!\n" +
+		"На данный момент принято уже %d прогнозов, заболевших вчера - %d\n" +
+		"Прием ставок продлится до %d часов утра по Москве",
+		betsCount(), current, betTimeTo)
+	remindLater(5 * time.Hour, text)
 }
 
 
@@ -190,7 +203,8 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		forceBetsAllowed = true
 
-		go remindLater()
+		go earlyRemind()
+		go lateRemind()
 		return MakeHandlerResultBroadcast(result)
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {
