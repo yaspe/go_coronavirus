@@ -8,66 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 )
-
-
-func setCurrent(s string) error {
-	var e error
-	current, e = strconv.Atoi(s)
-	return e
-}
-
-func remindLater(d time.Duration, msg string) {
-	time.Sleep(d)
-	for username, chat := range chats {
-		if val, ok := bets[username]; ok && val > 0 {
-			continue
-		}
-		msg := tgbotapi.NewMessage(chat, msg)
-		_, er := bot.Send(msg)
-		if er != nil {
-			fmt.Printf("Could not send message: %s\n", er)
-		}
-	}
-}
-
-func earlyRemind() {
-	text := fmt.Sprintf("Прием прогнозов на сегодня открыт и продлится до %d часов утра по Москве!\n", betTimeTo)
-	remindLater(5 * time.Minute, text)
-}
-
-func lateRemind() {
-	remindLater(
-		5 * time.Hour,
-		fmt.Sprintf("Напоминаем, что прием прогнозов открыт!\n" +
-			"На данный момент принято уже %d прогнозов, заболевших вчера - %d\n" +
-			"Прием ставок продлится до %d часов утра по Москве", betsCount(), current, betTimeTo))
-}
-
-
-type HandlerResult struct {
-	Reply string
-	Error error
-	BroadCast bool
-	RemindMode bool
-}
-
-func MakeHandlerResultSuccess(reply string) *HandlerResult {
-	return &HandlerResult{reply, nil, false, false}
-}
-
-func MakeHandlerResultBroadcast(reply string) *HandlerResult {
-	return &HandlerResult{reply, nil, true, false}
-}
-
-func MakeHandlerResultRemind(reply string) *HandlerResult {
-	return &HandlerResult{reply, nil, true, true}
-}
-
-func MakeHandlerResultError(e error) *HandlerResult {
-	return &HandlerResult{"", e, false, false}
-}
 
 func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 	if len(msg.From.UserName) == 0 {
@@ -109,7 +50,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		if len(parts) != 2 {
 			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
-		winners[parts[1]] ++
+		winners[parts[1]]++
 		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/clear" {
 		if msg.From.UserName != admin {
@@ -175,18 +116,18 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		if len(keys) > 0 {
 			for _, winner := range top[keys[0]] {
-				winners[winner] ++
+				winners[winner]++
 			}
 		}
 
-		result := fmt.Sprintf("Подводим итоги дня!\n" +
-			"Было принято ставок: %d\n" +
-			"Всего заболевших в России на данный момент: %d\n\n" +
+		result := fmt.Sprintf("Подводим итоги дня!\n"+
+			"Было принято ставок: %d\n"+
+			"Всего заболевших в России на данный момент: %d\n\n"+
 			"---победители дня(ошибка):---\n",
 			betsCount(), current)
 		start := true
 		for _, k := range keys {
-			for i, name := range(top[k]) {
+			for i, name := range top[k] {
 				if i > 0 {
 					result += ", "
 				}

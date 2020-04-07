@@ -8,10 +8,10 @@ import (
 )
 
 const (
-	admin = "yaspe"
- 	dataFileName = "data.db"
- 	betTimeFrom = 15
- 	betTimeTo = 7
+	admin        = "yaspe"
+	dataFileName = "data.db"
+	betTimeFrom  = 15
+	betTimeTo    = 7
 )
 
 var (
@@ -24,11 +24,13 @@ var (
 	forceBetsAllowed = true
 )
 
-var version = "unknown" // from build flags
+var version = "unknown" // -ldflags "-X 'main.version=`git rev-list --all --count`'"
 var bot *tgbotapi.BotAPI
 
 func main() {
 	Load()
+	go dumpLoop()
+
 	token := os.Args[1]
 
 	var er error
