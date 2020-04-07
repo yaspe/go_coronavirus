@@ -25,8 +25,8 @@ func help() string {
 			"/winners : прошлые победители\n" +
 			"/github : посмотреть исходники\n" +
 			"/help : посмотреть это сообщение\n" +
-			"Багрепорты и фичереквесты можно отправлять @yaspe",
-		current, betsCount(), chatsCount())
+			"Версия %s. Багрепорты и фичереквесты можно отправлять @yaspe",
+		current, betsCount(), chatsCount(), version)
 	return h
 }
 

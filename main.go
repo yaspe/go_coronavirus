@@ -24,6 +24,7 @@ var (
 	forceBetsAllowed = true
 )
 
+var version = "unknown" // from build flags
 var bot *tgbotapi.BotAPI
 
 func main() {
