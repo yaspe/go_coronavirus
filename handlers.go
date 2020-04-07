@@ -38,11 +38,11 @@ func earlyRemind() {
 }
 
 func lateRemind() {
-	text := fmt.Sprintf("Напоминаем, что прием прогнозов открыт!\n" +
-		"На данный момент принято уже %d прогнозов, заболевших вчера - %d\n" +
-		"Прием ставок продлится до %d часов утра по Москве",
-		betsCount(), current, betTimeTo)
-	remindLater(5 * time.Hour, text)
+	remindLater(
+		5 * time.Hour,
+		fmt.Sprintf("Напоминаем, что прием прогнозов открыт!\n" +
+			"На данный момент принято уже %d прогнозов, заболевших вчера - %d\n" +
+			"Прием ставок продлится до %d часов утра по Москве", betsCount(), current, betTimeTo))
 }
 
 
