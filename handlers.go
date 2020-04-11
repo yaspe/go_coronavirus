@@ -120,11 +120,13 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			}
 		}
 
+		min, max, avg := minMaxAvgBet()
 		result := fmt.Sprintf("Подводим итоги дня!\n"+
 			"Было принято ставок: %d\n"+
-			"Всего заболевших в России на данный момент: %d\n\n"+
-			"---победители дня(ошибка):---\n",
-			betsCount(), current)
+			"Минимальная: %d\nМаксимальная: %d\nСредняя: %d\n"+
+			"По официальным данным заболевших в России на данный момент: %d\n\n"+
+			"---победители дня(ставка):---\n",
+			betsCount(), min, max, avg, current)
 		start := true
 		for _, k := range keys {
 			for i, name := range top[k] {
@@ -132,8 +134,9 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 					result += ", "
 				}
 				result += formatName(name)
+				result += " (" + strconv.Itoa(bets[name]) + ")"
 			}
-			result += " (" + strconv.Itoa(k) + ")\n"
+			result += "\n"
 			if start {
 				result += "---проиграли:---\n"
 				start = false
@@ -207,8 +210,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		}
 
 		bets[msg.From.UserName] = total
-		successMsg := fmt.Sprintf("Ваша ставка: завтра число заболевших прирастет на %d и составит %d", inc, total)
-		return MakeHandlerResultSuccess(successMsg)
+		return MakeHandlerResultSuccess(betInfo(inc, total))
 	} else if parts[0] == "/get" {
 		return MakeHandlerResultSuccess(strconv.Itoa(current))
 	} else if parts[0] == "/mybet" {
@@ -217,8 +219,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			return MakeHandlerResultSuccess("Вы еще не делали ставку")
 		}
 		inc := total - current
-		successMsg := fmt.Sprintf("Ваша ставка: завтра число заболевших прирастет на %d и составит %d", inc, total)
-		return MakeHandlerResultSuccess(successMsg)
+		return MakeHandlerResultSuccess(betInfo(inc, total))
 	} else if parts[0] == "/github" {
 		return MakeHandlerResultSuccess("https://github.com/yaspe/go_coronavirus")
 	} else if parts[0] == "/winners" {

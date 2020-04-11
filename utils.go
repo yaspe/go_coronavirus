@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"math"
 	"strconv"
 	"time"
 )
@@ -123,4 +124,27 @@ func dumpLoop() {
 		time.Sleep(15 * time.Minute)
 		Dump()
 	}
+}
+
+func betInfo(inc, total int) string {
+	return fmt.Sprintf("Ваша ставка: завтра число заболевших прирастет на %d и составит %d", inc, total)
+}
+
+func minMaxAvgBet() (int, int, int) {
+	var min, max, sum, num int
+	min = math.MaxInt32
+	for _, val := range bets {
+		if val == 0 {
+			continue
+		}
+		if val < min {
+			min = val
+		}
+		if val > max {
+			max = val
+		}
+		sum += val
+		num++
+	}
+	return min, max, sum / num
 }
