@@ -203,7 +203,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			total = bet + current
 		} else {
 			total = bet
-			inc = total - bets[msg.From.UserName]
+			inc = total - current
 		}
 
 		bets[msg.From.UserName] = total
@@ -212,7 +212,13 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 	} else if parts[0] == "/get" {
 		return MakeHandlerResultSuccess(strconv.Itoa(current))
 	} else if parts[0] == "/mybet" {
-		return MakeHandlerResultSuccess(strconv.Itoa(bets[msg.From.UserName]))
+		total := bets[msg.From.UserName]
+		if total == 0 {
+			return MakeHandlerResultSuccess("Вы еще не делали ставку")
+		}
+		inc := total - current
+		successMsg := fmt.Sprintf("Ваша ставка: завтра число заболевших прирастет на %d и составит %d", inc, total)
+		return MakeHandlerResultSuccess(successMsg)
 	} else if parts[0] == "/github" {
 		return MakeHandlerResultSuccess("https://github.com/yaspe/go_coronavirus")
 	} else if parts[0] == "/winners" {
