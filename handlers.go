@@ -197,12 +197,18 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			return MakeHandlerResultError(e)
 		}
 
-		if current > 0 && bet < current {
-			return MakeHandlerResultError(errors.New("Число заболевших фиксируется с 1го дня и не может уменьшится. Ставка невалидна"))
+		var inc, total int
+		if bet < current {
+			inc = bet
+			total = bet + current
+		} else {
+			total = bet
+			inc = total - bets[msg.From.UserName]
 		}
 
-		bets[msg.From.UserName] = bet
-		return MakeHandlerResultSuccess("Ваша ставка принята!")
+		bets[msg.From.UserName] = total
+		successMsg := fmt.Sprintf("Ваша ставка: завтра число заболевших прирастет на %d и составит %d", inc, total)
+		return MakeHandlerResultSuccess(successMsg)
 	} else if parts[0] == "/get" {
 		return MakeHandlerResultSuccess(strconv.Itoa(current))
 	} else if parts[0] == "/mybet" {
