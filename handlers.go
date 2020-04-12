@@ -123,9 +123,9 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		min, max, avg := minMaxAvgBet()
 		result := fmt.Sprintf("Подводим итоги дня!\n"+
 			"Было принято ставок: %d\n"+
-			"Минимальная: %d\nМаксимальная: %d\nСредняя: %d\n"+
+			"Минимальная: %d\nМаксимальная: %d\nСредняя: %d\n"+
 			"По официальным данным заболевших в России на данный момент: %d\n\n"+
-			"---победители дня(ставка):---\n",
+			"---победители дня(прогноз):---\n",
 			betsCount(), min, max, avg, current)
 		start := true
 		for _, k := range keys {
@@ -157,7 +157,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		Dump()
 
-		result := "ставки:\n"
+		result := "прознозы:\n"
 		count := 0
 		for u, b := range bets {
 			if b == 0 {
@@ -189,7 +189,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		if !betsAllowed() {
 			hours, minutes := mskTime()
-			message := fmt.Sprintf("Во избежании нечестной игры, ставки можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
+			message := fmt.Sprintf("Во избежании нечестной игры, прознозы можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
 				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)
 			return MakeHandlerResultSuccess(message)
 		}
@@ -216,7 +216,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 	} else if parts[0] == "/mybet" {
 		total := bets[msg.From.UserName]
 		if total == 0 {
-			return MakeHandlerResultSuccess("Вы еще не делали ставку")
+			return MakeHandlerResultSuccess("Вы еще не делали прозноз")
 		}
 		inc := total - current
 		return MakeHandlerResultSuccess(betInfo(inc, total))
