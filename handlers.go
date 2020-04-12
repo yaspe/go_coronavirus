@@ -122,8 +122,8 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		min, max, avg := minMaxAvgBet()
 		result := fmt.Sprintf("Подводим итоги дня!\n"+
-			"Было принято ставок: %d\n"+
-			"Минимальная: %d\nМаксимальная: %d\nСредняя: %d\n"+
+			"Было принято прогнозов: %d\n"+
+			"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
 			"По официальным данным заболевших в России на данный момент: %d\n\n"+
 			"---победители дня(прогноз):---\n",
 			betsCount(), min, max, avg, current)
