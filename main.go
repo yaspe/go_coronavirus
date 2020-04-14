@@ -55,6 +55,17 @@ func main() {
 
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
+		if update.Message.ForwardFrom != nil && update.Message.ForwardFrom.UserName == admin {
+			for _, chat := range chats {
+				fwd := tgbotapi.NewForward(chat, chats[admin], update.Message.MessageID)
+				_, er = bot.Send(fwd)
+				if er != nil {
+					log.Printf("Could not send message: %s", er)
+				}
+			}
+			continue
+		}
+
 		var msg tgbotapi.MessageConfig
 
 		result := handleMessage(update.Message)
