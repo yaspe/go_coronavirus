@@ -18,6 +18,7 @@ var (
 	current          = 0
 	shouldShutdown   = false
 	bets             = make(map[string]int)
+	awaitingBets     = make(map[int64]bool)
 	chats            = make(map[string]int64)
 	winners          = make(map[string]int)
 	dataLock         sync.Mutex
@@ -97,6 +98,19 @@ func main() {
 				msg = tgbotapi.NewMessage(update.Message.Chat.ID, result.Reply)
 			}
 		}
+
+		markup := tgbotapi.ReplyKeyboardMarkup{
+			Keyboard: [][]tgbotapi.KeyboardButton{
+				{
+					{Text: "/bet"},
+					{Text: "/mybet"},
+					{Text: "/get"},
+					{Text: "/winners"},
+				},
+			},
+			ResizeKeyboard: true,
+		}
+		msg.ReplyMarkup = markup
 
 		_, er = bot.Send(msg)
 		if er != nil {
