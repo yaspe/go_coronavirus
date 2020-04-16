@@ -18,6 +18,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 	chats[msg.From.UserName] = msg.Chat.ID
 
 	parts := strings.Split(msg.Text, " ")
+
 	if parts[0] == "/set_current" {
 		if msg.From.UserName != admin {
 			return MakeHandlerResultError(errors.New("you are not admin"))
@@ -182,11 +183,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		}
 
 		return MakeHandlerResultSuccess(result)
-	} else if parts[0] == "/bet" {
-		if len(parts) != 2 {
-			return MakeHandlerResultError(errors.New("неверное числа параметров"))
-		}
-
+	} else if parts[0] == "/bet" || (len(parts) == 1 && awaitingBets[msg.Chat.ID]) {
 		if !betsAllowed() {
 			hours, minutes := mskTime()
 			message := fmt.Sprintf("Во избежании нечестной игры, прознозы можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
@@ -194,21 +191,30 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			return MakeHandlerResultSuccess(message)
 		}
 
+		var bet int
 		var e error
-		bet, e := strconv.Atoi(parts[1])
-		if e != nil {
-			return MakeHandlerResultError(e)
+
+		if len(parts) > 2 {
+			return MakeHandlerResultError(errors.New("неверное числа параметров"))
+		} else if len(parts) == 1 {
+			if awaitingBets[msg.Chat.ID] {
+				awaitingBets[msg.Chat.ID] = false
+				bet, e = strconv.Atoi(parts[0])
+				if e != nil {
+					return MakeHandlerResultError(e)
+				}
+			} else {
+				awaitingBets[msg.Chat.ID] = true
+				return MakeHandlerResultSuccess("Пришлите вас прогноз - сколько будет зараженных завтра?")
+			}
+		} else { // == 2
+			bet, e = strconv.Atoi(parts[1])
+			if e != nil {
+				return MakeHandlerResultError(e)
+			}
 		}
 
-		var inc, total int
-		if bet < current {
-			inc = bet
-			total = bet + current
-		} else {
-			total = bet
-			inc = total - current
-		}
-
+		var inc, total int = calcBet(bet)
 		bets[msg.From.UserName] = total
 		return MakeHandlerResultSuccess(betInfo(inc, total))
 	} else if parts[0] == "/get" {

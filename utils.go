@@ -147,3 +147,15 @@ func minMaxAvgBet() (int, int, int) {
 	}
 	return min, max, sum / num
 }
+
+func calcBet(bet int) (int, int) {
+	var inc, total int
+	if bet < current {
+		inc = bet
+		total = bet + current
+	} else {
+		total = bet
+		inc = total - current
+	}
+	return inc, total
+}
