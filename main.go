@@ -104,8 +104,8 @@ func main() {
 				{
 					{Text: "/bet"},
 					{Text: "/mybet"},
-					{Text: "/get"},
 					{Text: "/winners"},
+					{Text: "/help"},
 				},
 			},
 			ResizeKeyboard: true,
