@@ -218,7 +218,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		bets[msg.From.UserName] = total
 		return MakeHandlerResultSuccess(betInfo(inc, total))
 	} else if parts[0] == "/get" {
-		return MakeHandlerResultSuccess(strconv.Itoa(current))
+		return MakeHandlerResultSuccess(fmt.Sprintf("На данный момент заболевших: %d", current))
 	} else if parts[0] == "/mybet" {
 		total := bets[msg.From.UserName]
 		if total == 0 {
