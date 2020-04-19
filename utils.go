@@ -145,6 +145,9 @@ func minMaxAvgBet() (int, int, int) {
 		sum += val
 		num++
 	}
+	if num == 0 {
+		return 0, 0, 0
+	}
 	return min, max, sum / num
 }
 
@@ -158,4 +161,22 @@ func calcBet(bet int) (int, int) {
 		inc = total - current
 	}
 	return inc, total
+}
+
+func sendWithMarkup(msg tgbotapi.MessageConfig) error {
+	markup := tgbotapi.ReplyKeyboardMarkup{
+		Keyboard: [][]tgbotapi.KeyboardButton{
+			{
+				{Text: "/bet"},
+				{Text: "/mybet"},
+				{Text: "/winners"},
+				{Text: "/help"},
+			},
+		},
+		ResizeKeyboard: true,
+	}
+	msg.ReplyMarkup = markup
+
+	_, er := bot.Send(msg)
+	return er
 }

@@ -86,10 +86,12 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
 
+		oldCurrent := current
 		e := setCurrent(parts[1])
 		if e != nil {
 			return MakeHandlerResultError(e)
 		}
+		dailyDiff := current - oldCurrent
 
 		if current == 0 {
 			return MakeHandlerResultError(errors.New("set current"))
@@ -123,11 +125,11 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		min, max, avg := minMaxAvgBet()
 		result := fmt.Sprintf("Подводим итоги дня!\n"+
+			"За прошедние сутки было зафиксировано %d новых заражений, число заболевших достигло %d\n"+
 			"Было принято прогнозов: %d\n"+
-			"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
-			"По официальным данным заболевших в России на данный момент: %d\n\n"+
+			"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n\n"+
 			"---победители дня(прогноз):---\n",
-			betsCount(), min, max, avg, current)
+			dailyDiff, current, betsCount(), min, max, avg)
 		start := true
 		for _, k := range keys {
 			for i, name := range top[k] {

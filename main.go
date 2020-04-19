@@ -88,7 +88,7 @@ func main() {
 					}
 					log.Printf("Broadcasting message to: %d", chat)
 					msg = tgbotapi.NewMessage(chat, result.Reply)
-					_, er := bot.Send(msg)
+					er := sendWithMarkup(msg)
 					if er != nil {
 						log.Printf("Could not send message: %s", er)
 					}
@@ -99,20 +99,7 @@ func main() {
 			}
 		}
 
-		markup := tgbotapi.ReplyKeyboardMarkup{
-			Keyboard: [][]tgbotapi.KeyboardButton{
-				{
-					{Text: "/bet"},
-					{Text: "/mybet"},
-					{Text: "/winners"},
-					{Text: "/help"},
-				},
-			},
-			ResizeKeyboard: true,
-		}
-		msg.ReplyMarkup = markup
-
-		_, er = bot.Send(msg)
+		er = sendWithMarkup(msg)
 		if er != nil {
 			log.Printf("Could not send message: %s", er)
 		}
