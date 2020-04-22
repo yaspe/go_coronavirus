@@ -157,34 +157,8 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		if msg.From.UserName != admin {
 			return MakeHandlerResultError(errors.New("you are not admin"))
 		}
-
 		Dump()
-
-		result := "прознозы:\n"
-		count := 0
-		for u, b := range bets {
-			if b == 0 {
-				continue
-			}
-			count++
-			result += formatName(u) + " " + strconv.Itoa(b) + "\n"
-		}
-		result += "Всего " + strconv.Itoa(count)
-
-		if len(parts) == 2 {
-			result += "\n\nчаты:\n"
-			count = 0
-			for u, c := range chats {
-				if c == 0 {
-					continue
-				}
-				count++
-				result += u + " " + strconv.Itoa(int(c)) + "\n"
-			}
-			result += "Всего " + strconv.Itoa(count)
-		}
-
-		return MakeHandlerResultSuccess(result)
+		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/bet" || (len(parts) == 1 && awaitingBets[msg.Chat.ID]) {
 		if !betsAllowed() {
 			hours, minutes := mskTime()
@@ -250,6 +224,18 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		for _, kv := range ss {
 			result += formatName(kv.Key) + "\n"
 		}
+		return MakeHandlerResultSuccess(result)
+	} else if parts[0] == "/list_bets" {
+		result := "прознозы:\n"
+		count := 0
+		for u, b := range bets {
+			if b == 0 {
+				continue
+			}
+			count++
+			result += formatName(u) + " " + strconv.Itoa(b) + "\n"
+		}
+		result += "Всего " + strconv.Itoa(count)
 		return MakeHandlerResultSuccess(result)
 	} else {
 		return MakeHandlerResultSuccess(help())
