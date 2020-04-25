@@ -30,6 +30,7 @@ var bot *tgbotapi.BotAPI
 
 func main() {
 	Load()
+	go reportLoop()
 	go dumpLoop()
 
 	token := os.Args[1]

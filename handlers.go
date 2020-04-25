@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -31,6 +30,15 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			return MakeHandlerResultError(e)
 		}
 		return MakeHandlerResultSuccess("ok")
+	} else if parts[0] == "/ask_wiki" {
+		if msg.From.UserName != admin {
+			return MakeHandlerResultError(errors.New("you are not admin"))
+		}
+		todayWiki, e := getTodayCurrentFromWiki()
+		if e != nil {
+			return MakeHandlerResultError(e)
+		}
+		return MakeHandlerResultSuccess(fmt.Sprintf("%d", todayWiki))
 	} else if parts[0] == "/shutdown" {
 		if msg.From.UserName != admin {
 			return MakeHandlerResultError(errors.New("you are not admin"))
@@ -86,73 +94,11 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			return MakeHandlerResultError(errors.New("args num mismatch"))
 		}
 
-		oldCurrent := current
-		e := setCurrent(parts[1])
+		newCurrent, e := strconv.Atoi(parts[1])
 		if e != nil {
 			return MakeHandlerResultError(e)
 		}
-		dailyDiff := current - oldCurrent
-
-		if current == 0 {
-			return MakeHandlerResultError(errors.New("set current"))
-		}
-
-		top := make(map[int][]string)
-		for u, b := range bets {
-			if b == 0 {
-				continue
-			}
-			diff := int(math.Abs(float64(current - b)))
-			if _, ok := top[diff]; ok {
-				top[diff] = append(top[diff], u)
-			} else {
-				top[diff] = make([]string, 1)
-				top[diff][0] = u
-			}
-		}
-
-		var keys []int
-		for k := range top {
-			keys = append(keys, k)
-		}
-		sort.Ints(keys)
-
-		if len(keys) > 0 {
-			for _, winner := range top[keys[0]] {
-				winners[winner]++
-			}
-		}
-
-		min, max, avg := minMaxAvgBet()
-		result := fmt.Sprintf("Подводим итоги дня!\n"+
-			"За прошедние сутки было зафиксировано %d новых заражений, число заболевших достигло %d\n"+
-			"Было принято прогнозов: %d\n"+
-			"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n\n"+
-			"---победители дня(прогноз):---\n",
-			dailyDiff, current, betsCount(), min, max, avg)
-		start := true
-		for _, k := range keys {
-			for i, name := range top[k] {
-				if i > 0 {
-					result += ", "
-				}
-				result += formatName(name)
-				result += " (" + strconv.Itoa(bets[name]) + ")"
-			}
-			result += "\n"
-			if start {
-				result += "---проиграли:---\n"
-				start = false
-			}
-		}
-
-		bets = make(map[string]int)
-
-		forceBetsAllowed = true
-
-		go earlyRemind()
-		go lateRemind()
-		return MakeHandlerResultBroadcast(result)
+		return report(newCurrent)
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {
 			return MakeHandlerResultError(errors.New("you are not admin"))
