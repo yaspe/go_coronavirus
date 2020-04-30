@@ -105,17 +105,17 @@ func remindLater(d time.Duration, msg string) {
 }
 
 func earlyRemind() {
-	text := fmt.Sprintf("Прием прогнозов на сегодня открыт и продлится до %d часов утра по Москве!\n", betTimeTo)
+	text := fmt.Sprintf("Прием прогнозов на сегодня открыт и продлится до %d часов утра по Москве!\nСделать прозноз: /bet", betTimeTo)
 	remindLater(5*time.Minute, text)
 }
 
 func lateRemind() {
 	remindLater(
-		5*time.Hour,
+		8*time.Hour,
 		fmt.Sprintf("Напоминаем, что прием прогнозов открыт!\n"+
 			"Заболевших вчера - %d\n"+
 			"Прием прогнозов продлится до %d часов утра по Москве\n"+
-			"Сделать прозноз: /bet <число>",
+			"Сделать прозноз: /bet",
 			current, betTimeTo))
 }
 
