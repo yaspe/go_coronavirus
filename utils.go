@@ -181,6 +181,7 @@ func sendWithMarkup(msg tgbotapi.MessageConfig) error {
 		ResizeKeyboard: true,
 	}
 	msg.ReplyMarkup = markup
+	msg.ParseMode = "html"
 
 	_, er := bot.Send(msg)
 	return er

@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 func handleMessage(msg *tgbotapi.Message) *HandlerResult {
@@ -172,16 +173,27 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		}
 		return MakeHandlerResultSuccess(result)
 	} else if parts[0] == "/list_bets" {
-		result := "прознозы:\n"
+		result := "прознозы:\n<pre>"
 		count := 0
+		var longestName int
+		for u := range bets {
+			if len(u) > longestName {
+				longestName = utf8.RuneCountInString(formatName(u))
+			}
+		}
 		for u, b := range bets {
 			if b == 0 {
 				continue
 			}
 			count++
-			result += formatName(u) + " " + printLargeNumber(b) + "\n"
+			spaceLen := longestName + 1 - utf8.RuneCountInString(formatName(u))
+			result += formatName(u)
+			for i := 0; i < spaceLen; i++ {
+				result += " "
+			}
+			result += printLargeNumber(b) + "\n"
 		}
-		result += "Всего " + strconv.Itoa(count)
+		result += "</pre>Всего " + strconv.Itoa(count)
 		return MakeHandlerResultSuccess(result)
 	} else {
 		return MakeHandlerResultSuccess(help())
