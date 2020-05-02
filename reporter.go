@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"sort"
-	"strconv"
 	"time"
 )
 
@@ -82,11 +81,11 @@ func report(newCurrent int) *HandlerResult {
 
 	min, max, avg := minMaxAvgBet()
 	result := fmt.Sprintf("Подводим итоги дня!\n"+
-		"За прошедние сутки было зафиксировано %d новых заражений, число заболевших достигло %d\n"+
+		"За прошедние сутки было зафиксировано %s новых заражений, число заболевших достигло %s\n"+
 		"Было принято прогнозов: %d\n"+
 		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n\n"+
 		"---победители дня(прогноз):---\n",
-		dailyDiff, current, betsCount(), min, max, avg)
+		printLargeNumber(dailyDiff), printLargeNumber(current), betsCount(), min, max, avg)
 	start := true
 	for _, k := range keys {
 		for i, name := range top[k] {
@@ -94,7 +93,7 @@ func report(newCurrent int) *HandlerResult {
 				result += ", "
 			}
 			result += formatName(name)
-			result += " (" + strconv.Itoa(bets[name]) + ")"
+			result += " (" + printLargeNumber(bets[name]) + ")"
 		}
 		result += "\n"
 		if start {

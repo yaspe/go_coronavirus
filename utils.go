@@ -19,7 +19,7 @@ func help() string {
 		"Это бот прогнозов на количество зараженных коронавирусом в России. "+
 			"Число заболевших отсчитывается с 1го дня, таким образом каждый день оно должно расти\n"+
 			"Подведение итогов в районе 11-15 часов каждого дня, зависит от времени появления новостей\n"+
-			"На данный момент заболевших: %d, прогнозов: %d\n"+
+			"На данный момент заболевших: %s, прогнозов: %d\n"+
 			"Подписано на бота: %d\n\n"+
 			betsInfo+"\n\n"+
 			"/bet : сделать прогноз на число заболевших завтра. Если число меньше количества заболевших сейчас, оно трактуется как прирост. "+
@@ -30,7 +30,7 @@ func help() string {
 			"/winners : прошлые победители\n"+
 			"/help : посмотреть это сообщение\n"+
 			"Версия %s",
-		current, betsCount(), chatsCount(), version)
+		printLargeNumber(current), betsCount(), chatsCount(), version)
 	return h
 }
 
@@ -127,7 +127,7 @@ func dumpLoop() {
 }
 
 func betInfo(inc, total int) string {
-	return fmt.Sprintf("Ваш прогноз: завтра число заболевших прирастет на %d и составит %d", inc, total)
+	return fmt.Sprintf("Ваш прогноз: завтра число заболевших прирастет на %s и составит %s", printLargeNumber(inc), printLargeNumber(total))
 }
 
 func minMaxAvgBet() (int, int, int) {
@@ -184,4 +184,23 @@ func sendWithMarkup(msg tgbotapi.MessageConfig) error {
 
 	_, er := bot.Send(msg)
 	return er
+}
+
+func printLargeNumber(n int) string {
+	if n < 10000 {
+		return strconv.Itoa(n)
+	}
+	if n < 1000000 {
+		result := strconv.Itoa(n / 1000)
+		result += " "
+		result += fmt.Sprintf("%03d", n%1000)
+		return result
+	}
+
+	result := strconv.Itoa(n / 1000000)
+	result += " "
+	result += fmt.Sprintf("%03d", n%1000000/1000)
+	result += " "
+	result += fmt.Sprintf("%03d", n%1000)
+	return result
 }
