@@ -190,6 +190,14 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		}
 		result += "</pre>Всего " + strconv.Itoa(count)
 		return MakeHandlerResultSuccess(result)
+	} else if parts[0] == "/contact" || awaitingContact[msg.Chat.ID] {
+		if awaitingContact[msg.Chat.ID] {
+			awaitingContact[msg.Chat.ID] = false
+			return MakeHandlerResultContact(formatName(msg.Chat.UserName) + ": " + strings.Join(parts, " "))
+		} else {
+			awaitingContact[msg.Chat.ID] = true
+			return MakeHandlerResultSuccess("Введите ваше сообщение")
+		}
 	} else {
 		return MakeHandlerResultSuccess(help())
 	}

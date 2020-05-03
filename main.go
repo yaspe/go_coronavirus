@@ -9,6 +9,7 @@ import (
 
 const (
 	admin        = "yaspe"
+	adminChatId  = 37129726
 	dataFileName = "data.db"
 	betTimeFrom  = 15
 	betTimeTo    = 7
@@ -19,6 +20,7 @@ var (
 	shouldShutdown   = false
 	bets             = make(map[string]int)
 	awaitingBets     = make(map[int64]bool)
+	awaitingContact  = make(map[int64]bool)
 	chats            = make(map[string]int64)
 	winners          = make(map[string]int)
 	dataLock         sync.Mutex
@@ -55,7 +57,7 @@ func main() {
 			continue
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		log.Printf("[%s, %d] %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text)
 
 		if update.Message.ForwardFrom != nil && update.Message.ForwardFrom.UserName == admin {
 			for _, chat := range chats {
@@ -95,6 +97,8 @@ func main() {
 					}
 				}
 				continue
+			} else if result.ContactMode {
+				msg = tgbotapi.NewMessage(adminChatId, result.Reply)
 			} else {
 				msg = tgbotapi.NewMessage(update.Message.Chat.ID, result.Reply)
 			}
