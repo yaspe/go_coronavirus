@@ -8,6 +8,7 @@ import (
 	"math"
 	"sort"
 	"time"
+	"unicode/utf8"
 )
 
 func reportLoop() {
@@ -83,24 +84,26 @@ func report(newCurrent int) *HandlerResult {
 	result := fmt.Sprintf("Подводим итоги дня!\n"+
 		"За прошедние сутки было зафиксировано %s новых заражений, число заболевших достигло %s\n"+
 		"Было принято прогнозов: %d\n"+
-		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n\n"+
-		"---победители дня(прогноз):---\n",
+		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
+		"<pre>---победители дня(прогноз):---\n",
 		printLargeNumber(dailyDiff), printLargeNumber(current), betsCount(), min, max, avg)
+	longestName := getLongestName()
 	start := true
 	for _, k := range keys {
-		for i, name := range top[k] {
-			if i > 0 {
-				result += ", "
-			}
+		for _, name := range top[k] {
 			result += formatName(name)
-			result += " (" + printLargeNumber(bets[name]) + ")"
+			spaceLen := longestName + 1 - utf8.RuneCountInString(formatName(name))
+			for i := 0; i < spaceLen; i++ {
+				result += " "
+			}
+			result += printLargeNumber(bets[name]) + "\n"
 		}
-		result += "\n"
 		if start {
 			result += "---проиграли:---\n"
 			start = false
 		}
 	}
+	result += "</pre>"
 
 	bets = make(map[string]int)
 

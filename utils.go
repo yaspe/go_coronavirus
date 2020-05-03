@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"time"
+	"unicode/utf8"
 )
 
 func help() string {
@@ -204,4 +205,14 @@ func printLargeNumber(n int) string {
 	result += " "
 	result += fmt.Sprintf("%03d", n%1000)
 	return result
+}
+
+func getLongestName() int {
+	var longestName int
+	for u := range bets {
+		if len(u) > longestName {
+			longestName = utf8.RuneCountInString(formatName(u))
+		}
+	}
+	return longestName
 }
