@@ -61,7 +61,7 @@ func report(newCurrent int, debug bool) *HandlerResult {
 		if b == 0 {
 			continue
 		}
-		diff := int(math.Abs(float64(current - b)))
+		diff := int(math.Abs(float64(newCurrent - b)))
 		if _, ok := top[diff]; ok {
 			top[diff] = append(top[diff], u)
 		} else {
@@ -88,17 +88,17 @@ func report(newCurrent int, debug bool) *HandlerResult {
 		"Было принято прогнозов: %d\n"+
 		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
 		"<pre>---победители дня(прогноз):---\n",
-		printLargeNumber(dailyDiff), printLargeNumber(current), betsCount(), min, max, avg)
+		printLargeNumber(dailyDiff), printLargeNumber(newCurrent), betsCount(), min, max, avg)
 	longestName := getLongestName()
 	start := true
 	for _, k := range keys {
 		for _, name := range top[k] {
 			result += formatName(name)
-			spaceLen := longestName + 1 - utf8.RuneCountInString(formatName(name))
+			spaceLen := longestName - utf8.RuneCountInString(formatName(name))
 			for i := 0; i < spaceLen; i++ {
 				result += " "
 			}
-			result += fmt.Sprintf("%s (+%s)\n", printLargeNumber(bets[name]), printLargeNumber(bets[name]-oldCurrent))
+			result += fmt.Sprintf("|%s|+%s\n", printLargeNumber(bets[name]), printLargeNumber(bets[name]-oldCurrent))
 		}
 		if start {
 			result += "---проиграли:---\n"

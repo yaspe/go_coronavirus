@@ -195,12 +195,12 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 				continue
 			}
 			count++
-			spaceLen := longestName + 1 - utf8.RuneCountInString(formatName(u))
+			spaceLen := longestName - utf8.RuneCountInString(formatName(u))
 			result += formatName(u)
 			for i := 0; i < spaceLen; i++ {
 				result += " "
 			}
-			result += fmt.Sprintf("%s (+%s)\n", printLargeNumber(b), printLargeNumber(b-current))
+			result += fmt.Sprintf("|%s|+%s\n", printLargeNumber(b), printLargeNumber(b-current))
 		}
 		result += "</pre>Всего " + strconv.Itoa(count)
 		return MakeHandlerResultSuccess(result)

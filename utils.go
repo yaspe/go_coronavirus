@@ -211,8 +211,11 @@ func printLargeNumber(n int) string {
 
 func getLongestName() int {
 	var longestName int
-	for u := range bets {
-		if len(u) > longestName {
+	for u, b := range bets {
+		if b == 0 {
+			continue
+		}
+		if utf8.RuneCountInString(u) > longestName {
 			longestName = utf8.RuneCountInString(formatName(u))
 		}
 	}
