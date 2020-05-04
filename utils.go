@@ -215,8 +215,9 @@ func getLongestName() int {
 		if b == 0 {
 			continue
 		}
-		if utf8.RuneCountInString(u) > longestName {
-			longestName = utf8.RuneCountInString(formatName(u))
+		formattedNameLen := utf8.RuneCountInString(formatName(u))
+		if formattedNameLen > longestName {
+			longestName = formattedNameLen
 		}
 	}
 	return longestName
