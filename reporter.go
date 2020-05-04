@@ -36,7 +36,7 @@ func reportLoop() {
 
 		for _, chat := range chats {
 			msg := tgbotapi.NewMessage(chat, r.Reply)
-			_, er := bot.Send(msg)
+			er := sendWithMarkup(msg)
 			if er != nil {
 				fmt.Printf("Could not send message: %s\n", er)
 			}
