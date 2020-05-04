@@ -98,7 +98,7 @@ func report(newCurrent int, debug bool) *HandlerResult {
 			for i := 0; i < spaceLen; i++ {
 				result += " "
 			}
-			result += printLargeNumber(bets[name]) + "\n"
+			result += fmt.Sprintf("%s (+%s)\n", printLargeNumber(bets[name]), printLargeNumber(bets[name]-oldCurrent))
 		}
 		if start {
 			result += "---проиграли:---\n"

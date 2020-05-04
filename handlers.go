@@ -200,7 +200,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 			for i := 0; i < spaceLen; i++ {
 				result += " "
 			}
-			result += printLargeNumber(b) + "\n"
+			result += fmt.Sprintf("%s (+%s)\n", printLargeNumber(b), printLargeNumber(b-current))
 		}
 		result += "</pre>Всего " + strconv.Itoa(count)
 		return MakeHandlerResultSuccess(result)
