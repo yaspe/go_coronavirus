@@ -29,7 +29,7 @@ func reportLoop() {
 			continue
 		}
 
-		r := report(newCurrent)
+		r := report(newCurrent, false)
 		if r.Error != nil {
 			continue
 		}
@@ -45,10 +45,12 @@ func reportLoop() {
 	}
 }
 
-func report(newCurrent int) *HandlerResult {
+func report(newCurrent int, debug bool) *HandlerResult {
 	oldCurrent := current
-	current = newCurrent
-	dailyDiff := current - oldCurrent
+	dailyDiff := newCurrent - oldCurrent
+	if !debug {
+		current = newCurrent
+	}
 
 	if current == 0 {
 		return MakeHandlerResultError(errors.New("set current"))
@@ -105,11 +107,12 @@ func report(newCurrent int) *HandlerResult {
 	}
 	result += "</pre>"
 
-	bets = make(map[string]int)
-
-	forceBetsAllowed = true
-
-	go earlyRemind()
-	go lateRemind()
-	return MakeHandlerResultBroadcast(result)
+	if !debug {
+		bets = make(map[string]int)
+		forceBetsAllowed = true
+		go earlyRemind()
+		go lateRemind()
+		return MakeHandlerResultBroadcast(result)
+	}
+	return MakeHandlerResultSuccess(result)
 }

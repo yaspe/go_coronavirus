@@ -99,7 +99,21 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		if e != nil {
 			return MakeHandlerResultError(e)
 		}
-		return report(newCurrent)
+		return report(newCurrent, false)
+	} else if parts[0] == "/test_report" {
+		if msg.From.UserName != admin {
+			return MakeHandlerResultError(errors.New("you are not admin"))
+		}
+
+		if len(parts) != 2 {
+			return MakeHandlerResultError(errors.New("args num mismatch"))
+		}
+
+		newCurrent, e := strconv.Atoi(parts[1])
+		if e != nil {
+			return MakeHandlerResultError(e)
+		}
+		return report(newCurrent, true)
 	} else if parts[0] == "/dump" {
 		if msg.From.UserName != admin {
 			return MakeHandlerResultError(errors.New("you are not admin"))
