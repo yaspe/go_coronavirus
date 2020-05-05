@@ -62,6 +62,18 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		}
 		winners[parts[1]]++
 		return MakeHandlerResultSuccess("ok")
+	} else if parts[0] == "/del_winner" {
+		if msg.From.UserName != admin {
+			return MakeHandlerResultError(errors.New("you are not admin"))
+		}
+		if len(parts) != 2 {
+			return MakeHandlerResultError(errors.New("args num mismatch"))
+		}
+		winners[parts[1]]--
+		if winners[parts[1]] < 0 {
+			winners[parts[1]] = 0
+		}
+		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/clear" {
 		if msg.From.UserName != admin {
 			return MakeHandlerResultError(errors.New("you are not admin"))
@@ -174,6 +186,9 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 
 		var ss []kv
 		for k, v := range winners {
+			if v == 0 {
+				continue
+			}
 			ss = append(ss, kv{k, v})
 		}
 

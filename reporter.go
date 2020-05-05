@@ -76,7 +76,7 @@ func report(newCurrent int, debug bool) *HandlerResult {
 	}
 	sort.Ints(keys)
 
-	if len(keys) > 0 {
+	if len(keys) > 0 && !debug {
 		for _, winner := range top[keys[0]] {
 			winners[winner]++
 		}
