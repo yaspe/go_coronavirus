@@ -83,7 +83,7 @@ func report(newCurrent int, debug bool) *HandlerResult {
 	}
 
 	min, max, avg := minMaxAvgBet()
-	result := fmt.Sprintf("Подводим итоги дня!\n"+
+	result := fmt.Sprintf("\U0001F9A0 Подводим итоги дня!\n"+
 		"За прошедние сутки было зафиксировано %s новых заражений, число заболевших достигло %s\n"+
 		"Было принято прогнозов: %d\n"+
 		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
