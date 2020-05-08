@@ -84,9 +84,9 @@ func report(newCurrent int, debug bool) *HandlerResult {
 
 	min, max, avg := minMaxAvgBet()
 	result := fmt.Sprintf("\U0001F9A0 Подводим итоги дня!\n"+
-		"За прошедние сутки было зафиксировано %s новых заражений, число заболевших достигло %s\n"+
+		"За прошедние сутки было зафиксировано <b>%s</b> новых заражений, число заболевших достигло <b>%s</b>\n"+
 		"Было принято прогнозов: %d\n"+
-		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
+		"Минимальный:%d Максимальный:%d Средний:%d\n"+
 		"<pre>---победители дня|прогноз|дельта:---\n",
 		printLargeNumber(dailyDiff), printLargeNumber(newCurrent), betsCount(), min, max, avg)
 	longestName := getLongestName()
