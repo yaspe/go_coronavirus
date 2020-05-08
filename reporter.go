@@ -87,7 +87,7 @@ func report(newCurrent int, debug bool) *HandlerResult {
 		"За прошедние сутки было зафиксировано %s новых заражений, число заболевших достигло %s\n"+
 		"Было принято прогнозов: %d\n"+
 		"Минимальный: %d\nМаксимальный: %d\nСредний: %d\n"+
-		"<pre>---победители дня(прогноз):---\n",
+		"<pre>---победители дня|прогноз|дельта:---\n",
 		printLargeNumber(dailyDiff), printLargeNumber(newCurrent), betsCount(), min, max, avg)
 	longestName := getLongestName()
 	start := true
