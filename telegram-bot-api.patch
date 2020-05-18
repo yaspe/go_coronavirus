@@ -1,0 +1,51 @@
+diff --git a/configs.go b/configs.go
+index 181d4e4..9a8fbca 100644
+--- a/configs.go
++++ b/configs.go
+@@ -240,6 +240,27 @@ func (config ForwardConfig) method() string {
+ 	return "forwardMessage"
+ }
+ 
++type PollConfig struct {
++	BaseChat
++	Question string
++	Options []string
++}
++
++func (config PollConfig) values() (url.Values, error) {
++	v, err := config.BaseChat.values()
++	if err != nil {
++		return v, err
++	}
++	v.Add("question", config.Question)
++	jsonString, _ := json.Marshal(config.Options)
++	v.Add("options", string(jsonString))
++	return v, nil
++}
++
++func (config PollConfig) method() string {
++	return "sendPoll"
++}
++
+ // PhotoConfig contains information about a SendPhoto request.
+ type PhotoConfig struct {
+ 	BaseFile
+diff --git a/helpers.go b/helpers.go
+index c4d236f..30d1057 100644
+--- a/helpers.go
++++ b/helpers.go
+@@ -51,6 +51,14 @@ func NewForward(chatID int64, fromChatID int64, messageID int) ForwardConfig {
+ 	}
+ }
+ 
++func NewPoll(chatID int64, question string, options []string) PollConfig {
++	return PollConfig{
++		BaseChat:   BaseChat{ChatID: chatID},
++		Question: question,
++		Options:  options,
++	}
++}
++
+ // NewPhotoUpload creates a new photo uploader.
+ //
+ // chatID is where to send it, file is a string path to the file,

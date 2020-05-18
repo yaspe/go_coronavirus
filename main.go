@@ -4,6 +4,7 @@ import (
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"log"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -59,15 +60,31 @@ func main() {
 
 		log.Printf("[%s, %d] %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text)
 
+		// pols requires a commit to github.com/go-telegram-bot-api/telegram-bot-api
+		// i have a diff and would try to push it
+		// see telegram-bot-api.patch
 		if update.Message.ForwardFrom != nil && update.Message.ForwardFrom.UserName == admin {
-			for _, chat := range chats {
-				fwd := tgbotapi.NewForward(chat, chats[admin], update.Message.MessageID)
-				_, er = bot.Send(fwd)
+			parts := strings.Split(update.Message.Text, "|")
+			if len(parts) >= 3 {
+				question := parts[0]
+				options := make([]string, 0)
+				for i := 1; i < len(parts); i++ {
+					options = append(options, parts[i])
+				}
+				fwd := tgbotapi.NewPoll(adminChatId, question, options)
+				ans, er := bot.Send(fwd)
 				if er != nil {
 					log.Printf("Could not send message: %s", er)
 				}
+				for _, chat := range chats {
+					fwd := tgbotapi.NewForward(chat, chats[admin], ans.MessageID)
+					_, er = bot.Send(fwd)
+					if er != nil {
+						log.Printf("Could not send message: %s", er)
+					}
+				}
+				continue
 			}
-			continue
 		}
 
 		var msg tgbotapi.MessageConfig
