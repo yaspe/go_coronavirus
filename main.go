@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/go-telegram-bot-api/telegram-bot-api" // use develop branch
 	"log"
 	"os"
 	"strings"
@@ -51,7 +51,7 @@ func main() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
-	updates, er := bot.GetUpdatesChan(u)
+	updates := bot.GetUpdatesChan(u)
 
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
@@ -60,9 +60,6 @@ func main() {
 
 		log.Printf("[%s, %d] %s", update.Message.From.UserName, update.Message.Chat.ID, update.Message.Text)
 
-		// pols requires a commit to github.com/go-telegram-bot-api/telegram-bot-api
-		// i have a diff and would try to push it
-		// see telegram-bot-api.patch
 		if update.Message.ForwardFrom != nil && update.Message.ForwardFrom.UserName == admin {
 			parts := strings.Split(update.Message.Text, "|")
 			if len(parts) >= 3 {
@@ -71,7 +68,7 @@ func main() {
 				for i := 1; i < len(parts); i++ {
 					options = append(options, parts[i])
 				}
-				fwd := tgbotapi.NewPoll(adminChatId, question, options)
+				fwd := tgbotapi.NewPoll(adminChatId, question, options...)
 				ans, er := bot.Send(fwd)
 				if er != nil {
 					log.Printf("Could not send message: %s", er)
