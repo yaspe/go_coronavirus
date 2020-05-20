@@ -202,7 +202,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		}
 		return MakeHandlerResultSuccess(result)
 	} else if parts[0] == "/list_bets" {
-		result := "прознозы:\n<pre>"
+		result := "прогнозы:\n<pre>"
 		count := 0
 		longestName := getLongestName()
 		for u, b := range bets {
