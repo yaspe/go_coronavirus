@@ -11,7 +11,7 @@ import (
 
 func help() string {
 	betsInfo := fmt.Sprintf("Сейчас прием прогнозов открыт и продлится до %d часов утра по Москве", betTimeTo)
-	if !betsAllowed() {
+	if !betsAllowed(mskTime()) {
 		betsInfo = fmt.Sprintf("Сейчас прием прогнозов закрыт. Он откроется после объявления результатов предыдущего дня и продлится до %d часов утра по Москве", betTimeTo)
 	}
 
@@ -41,8 +41,7 @@ func mskTime() (int, int) {
 	return hours + 3, minutes
 }
 
-func betsAllowed() bool {
-	hours, _ := mskTime()
+func betsAllowed(hours, _ int) bool {
 	ok := !(hours < betTimeFrom && hours > betTimeTo)
 	if ok {
 		forceBetsAllowed = false

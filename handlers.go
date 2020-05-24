@@ -133,7 +133,7 @@ func handleMessage(msg *tgbotapi.Message) *HandlerResult {
 		Dump()
 		return MakeHandlerResultSuccess("ok")
 	} else if parts[0] == "/bet" || (len(parts) == 1 && awaitingBets[msg.Chat.ID]) {
-		if !betsAllowed() {
+		if !betsAllowed(mskTime()) {
 			hours, minutes := mskTime()
 			message := fmt.Sprintf("Во избежании нечестной игры, прознозы можно делать в интревале %d и %d часов следующего дня по Москве. Дождитесь следующего окна! "+
 				"Сейчас %d:%02d", betTimeFrom, betTimeTo, hours, minutes)

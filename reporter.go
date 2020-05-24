@@ -15,7 +15,7 @@ func reportLoop() {
 	for {
 		time.Sleep(time.Minute * 30)
 		log.Print("reportLoop time")
-		if betsAllowed() {
+		if betsAllowed(mskTime()) {
 			log.Print("bets allowed nothing to do")
 			continue
 		}
