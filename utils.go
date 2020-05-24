@@ -18,7 +18,7 @@ func help() string {
 	// ★
 	h := fmt.Sprintf(
 		"Это бот прогнозов на количество зараженных коронавирусом в России. "+
-			"Число заболевших отсчитывается с 1го дня, таким образом каждый день оно должно расти\n"+
+			"Число инфицированных отсчитывается с 1го дня, сегодня день %d.\n"+
 			"Подведение итогов в районе 11-15 часов каждого дня, зависит от времени появления новостей\n"+
 			"Инфицированных по данным за вчера: %s, прогнозов: %d\n"+
 			"Подписано на бота: %d\n\n"+
@@ -32,7 +32,7 @@ func help() string {
 			"/contact : связаться с создателем\n"+
 			"/help : посмотреть это сообщение\n"+
 			"Версия %s",
-		printLargeNumber(current), betsCount(), chatsCount(), version)
+		daysFrom1stCase(), printLargeNumber(current), betsCount(), chatsCount(), version)
 	return h
 }
 
@@ -220,4 +220,11 @@ func getLongestName() int {
 		}
 	}
 	return longestName
+}
+
+func daysFrom1stCase() int {
+	firstCase := time.Date(2020, 01, 31, 0, 0, 0, 0, time.UTC)
+	today := time.Now()
+	diff := today.Sub(firstCase)
+	return int(diff.Hours() / 24) // number of days
 }
